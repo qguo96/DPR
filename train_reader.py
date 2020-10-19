@@ -18,6 +18,7 @@ import logging
 import os
 from collections import defaultdict
 from typing import List
+from tqdm import tqdm
 
 import numpy as np
 import torch
@@ -159,7 +160,7 @@ class ReaderTrainer(object):
         all_results = []
 
         eval_top_docs = args.eval_top_docs
-        for i, samples_batch in enumerate(data_iterator.iterate_data()):
+        for i, samples_batch in tqdm(enumerate(data_iterator.iterate_data())):
             #print("get_one")
             input = create_reader_input(self.tensorizer.get_pad_id(),
                                         samples_batch,
@@ -178,9 +179,6 @@ class ReaderTrainer(object):
                                                           passage_thresholds=eval_top_docs)
 
             all_results.extend(batch_predictions)
-
-            if (i + 1) % log_result_step == 0:
-                logger.info('Eval step: %d ', i)
 
         ems = defaultdict(list)
 
