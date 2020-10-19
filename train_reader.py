@@ -32,6 +32,7 @@ from dpr.options import add_encoder_params, setup_args_gpu, set_seed, add_traini
 from dpr.utils.data_utils import ShardedDataIterator, read_serialized_data_from_files, Tensorizer
 from dpr.utils.model_utils import get_schedule_linear, load_states_from_checkpoint, move_to_device, CheckpointState, \
     get_model_file, setup_for_distributed_mode, get_model_obj
+from dpr.models.hf_models import get_bert_tensorizer
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -52,28 +53,31 @@ class ReaderTrainer(object):
 
         logger.info("***** Initializing components for training *****")
 
-        model_file = get_model_file(self.args, self.args.checkpoint_file_name)
+        #model_file = get_model_file(self.args, self.args.checkpoint_file_name)
         saved_state = None
-        if model_file:
-            saved_state = load_states_from_checkpoint(model_file)
-            set_encoder_params_from_state(saved_state.encoder_params, args)
+        #if model_file:
+        #    saved_state = load_states_from_checkpoint(model_file)
+        #    set_encoder_params_from_state(saved_state.encoder_params, args)
 
-        tensorizer, reader, optimizer = init_reader_components(args.encoder_model_type, args)
+        #tensorizer, reader, optimizer = init_reader_components(args.encoder_model_type, args)
 
-        reader, optimizer = setup_for_distributed_mode(reader, optimizer, args.device, args.n_gpu,
-                                                       args.local_rank,
-                                                       args.fp16,
-                                                       args.fp16_opt_level)
+        #print(args.fp16) 
+        #reader, optimizer = setup_for_distributed_mode(reader, optimizer, args.device, args.n_gpu,
+        #                                              args.local_rank,
+        #                                               args.fp16,
+        #                                               args.fp16_opt_level)
+        reader = None
+
         self.reader = reader
-        self.optimizer = optimizer
-        self.tensorizer = tensorizer
+        self.optimizer = None
+        self.tensorizer = get_bert_tensorizer(args)
         self.start_epoch = 0
         self.start_batch = 0
         self.scheduler_state = None
         self.best_validation_result = None
         self.best_cp_name = None
-        if saved_state:
-            self._load_saved_state(saved_state)
+        #if saved_state:
+        #    self._load_saved_state(saved_state)
 
     def get_data_iterator(self, path: str, batch_size: int, is_train: bool, shuffle=True,
                           shuffle_seed: int = 0,
@@ -156,6 +160,7 @@ class ReaderTrainer(object):
 
         eval_top_docs = args.eval_top_docs
         for i, samples_batch in enumerate(data_iterator.iterate_data()):
+            print("get_one")
             input = create_reader_input(self.tensorizer.get_pad_id(),
                                         samples_batch,
                                         args.passages_per_question_predict,
@@ -283,23 +288,23 @@ class ReaderTrainer(object):
         return cp
 
     def _load_saved_state(self, saved_state: CheckpointState):
-        epoch = saved_state.epoch
-        offset = saved_state.offset
-        if offset == 0:  # epoch has been completed
-            epoch += 1
-        logger.info('Loading checkpoint @ batch=%s and epoch=%s', offset, epoch)
-        self.start_epoch = epoch
-        self.start_batch = offset
-
+        #epoch = saved_state.epoch
+        #offset = saved_state.offset
+        #if offset == 0:  # epoch has been completed
+        #    epoch += 1
+        #logger.info('Loading checkpoint @ batch=%s and epoch=%s', offset, epoch)
+        #self.start_epoch = epoch
+        #self.start_batch = offset
         model_to_load = get_model_obj(self.reader)
+        #print(saved_state.model_dict)
         if saved_state.model_dict:
             logger.info('Loading model weights from saved state ...')
             model_to_load.load_state_dict(saved_state.model_dict)
 
-        logger.info('Loading saved optimizer state ...')
-        if saved_state.optimizer_dict:
-            self.optimizer.load_state_dict(saved_state.optimizer_dict)
-        self.scheduler_state = saved_state.scheduler_dict
+        #logger.info('Loading saved optimizer state ...')
+        #if saved_state.optimizer_dict:
+        #    self.optimizer.load_state_dict(saved_state.optimizer_dict)
+        #self.scheduler_state = saved_state.scheduler_dict
 
     def _get_best_prediction(self, start_logits, end_logits, relevance_logits,
                              samples_batch: List[ReaderSample], passage_thresholds: List[int] = None) \

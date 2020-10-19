@@ -55,10 +55,11 @@ def get_bert_reader_components(args, inference_only: bool = False, **kwargs):
     hidden_size = encoder.config.hidden_size
     reader = Reader(encoder, hidden_size)
 
-    optimizer = get_optimizer(reader,
-                              learning_rate=args.learning_rate,
-                              adam_eps=args.adam_eps, weight_decay=args.weight_decay,
-                              ) if not inference_only else None
+    #optimizer = get_optimizer(reader,
+    #                          learning_rate=args.learning_rate,
+    #                          adam_eps=args.adam_eps, weight_decay=args.weight_decay,
+    #                          ) if not inference_only else None
+    optimizer = None
 
     tensorizer = get_bert_tensorizer(args)
     return tensorizer, reader, optimizer
