@@ -6,3 +6,4 @@ COPY dpr /workspace/dpr/
 COPY *.py /workspace/
 COPY index /workspace/index/
 COPY reader_checkpoint.cp /workspace/
+COPY submission.sh .
