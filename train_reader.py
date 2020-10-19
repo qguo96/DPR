@@ -160,7 +160,7 @@ class ReaderTrainer(object):
 
         eval_top_docs = args.eval_top_docs
         for i, samples_batch in enumerate(data_iterator.iterate_data()):
-            print("get_one")
+            #print("get_one")
             input = create_reader_input(self.tensorizer.get_pad_id(),
                                         samples_batch,
                                         args.passages_per_question_predict,
