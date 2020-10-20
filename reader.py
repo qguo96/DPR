@@ -16,6 +16,7 @@ from dpr.options import add_encoder_params, setup_args_gpu, set_encoder_params_f
             add_tokenizer_params, add_training_params, add_reader_preprocessing_params
 
 if __name__ == '__main__':
+    torch.cuda.empty_cache()
     parser = argparse.ArgumentParser()
 
     add_encoder_params(parser)
@@ -40,8 +41,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     setup_args_gpu(args)
+    print(args.n_gpu)
     args.dev_file = 'retrieval_result.json'
-    args.dev_batch_size = 8
+    args.dev_batch_size = 4
     args.pretrained_model_cfg = 'bert-base-uncased'
     args.encoder_model_type = 'hf_bert'
     args.sequence_length = 350
@@ -65,10 +67,11 @@ if __name__ == '__main__':
     
     trainer = MyReaderTrainer(args)
     trainer.reader = torch.load('reader_checkpoint.cp')
-
+    trainer.reader.cuda()
+    
     trainer.validate()
 
-    os.remove(retrieval_file)
-    for i in range(args.num_workers):
-        os.remove(retrieval_file.replace(".json", ".{}.pkl".format(i)))
+    #os.remove(retrieval_file)
+    #for i in range(args.num_workers):
+    #    os.remove(retrieval_file.replace(".json", ".{}.pkl".format(i)))
 
