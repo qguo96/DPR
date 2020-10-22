@@ -153,7 +153,7 @@ ADD models models/
 
 Build and then test this Docker image.
 ```
-docker build --tag "$MODEL" "${SUBMISSION_DIR}/."
+docker build --tag "${MODEL}" "${SUBMISSION_DIR}/."
 docker run -v "${INPUT_DIR}:/input" -v "/tmp:/output" "${MODEL}" bash \
   "submission.sh" \
   "input/NQ-open.efficientqa.dev.no-annotations.jsonl" \
