@@ -43,13 +43,13 @@ if __name__ == '__main__':
     setup_args_gpu(args)
     print(args.n_gpu)
     args.dev_file = 'retrieval_result.json'
-    args.dev_batch_size = 4
+    args.dev_batch_size = 32
     args.pretrained_model_cfg = 'bert-base-uncased'
     args.encoder_model_type = 'hf_bert'
     args.sequence_length = 350
     args.do_lower_case = True
-    args.eval_top_docs = [10, 20, 40, 50, 80, 100]
-    args.passages_per_question_predict = 100
+    args.eval_top_docs = 50
+    args.passages_per_question_predict = 50
     
     #from IPython import embed; embed()
     from train_reader import ReaderTrainer
