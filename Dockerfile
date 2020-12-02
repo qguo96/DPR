@@ -3,7 +3,6 @@ FROM nvidia/cuda:10.1-base
 RUN apt update && \
     apt install -y bash \
                    build-essential \
-                   git \
                    curl \
                    ca-certificates \
 	           openjdk-11-jdk-headless \
@@ -13,17 +12,8 @@ RUN apt update && \
 
 RUN python3 -m pip install --no-cache-dir --upgrade pip && \
     python3 -m pip install --no-cache-dir \
-    mkl \
-    torch \
     spacy \
-    pyserini \
-    transformers==3.0.2 
+    pyserini
 
 WORKDIR /workspace
-COPY dpr /workspace/dpr/
-COPY *.py /workspace/
-COPY index /workspace/index/
-COPY reader_checkpoint.cp /workspace/
-COPY submission.sh .
-
 CMD ["/bin/bash"] 
